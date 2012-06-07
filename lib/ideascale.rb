@@ -1,7 +1,9 @@
-require "ideascale/version"
 require "rest_client"
 require "hashie"
 require 'json'
+require "ideascale/version"
+require "ideascale/campaign"
+require "ideascale/idea"
 
 module IdeaScale
   class RestApi
@@ -23,12 +25,12 @@ module IdeaScale
       RestClient.log = logger
     end
 
-    def resource(method_value)
-      RestClient::Resource.new api_url + method_value
+    def resource
+      @resource ||= RestClient::Resource.new api_url
     end
 
     def response(method_value)
-      resource(method_value).get "api_token" => settings[:api_token] do |response, request, result, &block|
+      resource[method_value].get "api_token" => settings[:api_token] do |response, request, result, &block|
         case response.code
         when 200
           response
@@ -43,19 +45,19 @@ module IdeaScale
     end
 
     def campaigns
-      get "/campaigns"
+      @campaigns ||= get("campaigns").map { |campaign| Campaign.new(campaign.merge(api: self)) }
     end
 
     def top_ideas
-      get "/ideas/top"
+      get "ideas/top"
     end
 
     def recent_ideas
-      get "/ideas/recent"
+      get "ideas/recent"
     end
 
     def campaign_ideas(campaign_id)
-      get "/campaigns/#{campaign_id}/ideas"
+      get "campaigns/#{campaign_id}/ideas"
     end
   end
 end

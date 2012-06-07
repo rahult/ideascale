@@ -9,8 +9,16 @@ settings = {
 apitest = IdeaScale::RestApi.new(settings)
 apitest.log = STDOUT
 
-apitest.campaigns.each do |campaign|
+campaigns = apitest.campaigns
+
+campaigns.each do |campaign|
   puts "#{campaign.id} - #{campaign.name}"
 end
 
-puts apitest.campaign_ideas(12358)
+first_campaign = campaigns.first
+
+puts "Top ideas for Campaign: #{first_campaign.name}"
+
+first_campaign.top_ideas.each do |idea|
+  puts "#{idea.id} - #{idea.title}, #{idea.tags}"
+end
